@@ -1,0 +1,101 @@
+@import './base.css';
+
+#app {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem;
+  font-weight: normal;
+}
+
+a,
+.green {
+  text-decoration: none;
+  color: hsla(160, 100%, 37%, 1);
+  transition: 0.4s;
+  padding: 3px;
+}
+
+
+.flex-reverse {
+  flex-flow: row-reverse;
+}
+.d-flex {
+  display: flex;
+  place-items: center;
+  justify-content: center;
+}
+.d-flex-md {
+  display: flex;
+  place-items: center;
+  justify-content: center;
+}
+.ml-3 {
+  margin-left: 16px;
+}
+.ml-3-md {
+  margin-left: 16px;
+}
+.ml-1 {
+  margin-left: 6px;
+}
+.mt-1 {
+  margin-top: 6px;
+}
+.mt-2 {
+  margin-top: 12px;
+}
+.mt-3 {
+  margin-top: 16px;
+}
+.mb-1 {
+  margin-bottom: 6px;
+}
+.mb-3-sm {
+  margin-bottom: 0;
+}
+.p-2 {
+  padding: 12px;
+}
+.d-block {
+  display: block;
+}
+.font-sm {
+  font-size: 0.8em;
+}
+.font-lg {
+  font-size: 1.4em;
+}
+.gray-bkg {
+  background-color: rgb(49 53 55);
+}
+.light-gray-bkg {
+  background-color: #6b6b6b;
+}
+.border-top {
+  border-top: solid thin black;
+}
+.button {
+  border-radius: 0;
+  border-bottom-width: 1px;
+  border-left-width: 1px;
+  border-top-width: 1px;
+  border-right-width: 1px;
+}
+
+@media (hover: hover) {
+  a:hover {
+    background-color: hsla(160, 100%, 37%, 0.2);
+  }
+}
+
+@media (max-width: 800px) {
+  .d-flex-md {
+    display: block;
+  }
+  .ml-3-md {
+    margin-left: 0;
+  }
+  .mb-3-sm {
+    margin-bottom: 16px;
+  }
+}
