@@ -1,74 +1,89 @@
 <script setup lang="ts">
 import {onMounted, ref} from "vue";
-import type { SongType } from "@/SongType";
+import type {SongEvent, SongType} from "./types.ts";
 import SongControls from './components/SongControls.vue';
-import SongVisualizer from "@/components/SongVisualizer.vue";
+import SongVisualizer from "./components/SongVisualizer.vue";
+import {FFT_SIZE} from "./constants";
 
-const FFT_SIZE = 128;
-let playing = true;
-let audioCtx;
-let analyser;
-let source;
+let playing: boolean = true;
+let audioCtx: AudioContext;
+let analyser: AnalyserNode;
+let source: AudioNode;
 
-const currentSong = ref();
-const visualizer =ref(null);
-const songs = ref<SongType>([{
+const currentSong = ref<string>();
+const visualizer = ref<InstanceType<typeof SongVisualizer>>();
+const songs = ref<SongType[]>([{
         title: '地球の中の城',
         fileName: '地球の中の城',
         id: '',
-        source: {}
+        source: null
     },{
         title: 'beet',
         fileName: 'beet',
         id: '',
-        source: {}
+        source: null
     },{
         title: 'chungus',
         fileName: 'chungus',
         id: '',
-        source: {}
+        source: null
     },{
         title: 'plumbus',
         fileName: 'plumbus',
         id: '',
-        source: {}
+        source: null
     },{
         title: 'こんにちは',
         fileName: 'こんにちは',
         id: '',
-        source: {}
+        source: null
 }]);
-const currentSongTimes = ref([]);
-const dataArray = ref([]);
-const bufferLength = ref(0);
-const totalSongTimes = ref([]);
+const currentSongTimes = ref<number[]>([]);
+const dataArray = ref<Uint8Array>(new Uint8Array(FFT_SIZE));
+const bufferLength = ref<number>(0);
+const totalSongTimes = ref<number[]>([]);
 
 function update() {
     analyser.getByteTimeDomainData(dataArray.value);
-    visualizer.value.update();
+
+    if (visualizer.value) {
+        visualizer.value.update();
+    }
 
     if (playing) {
         window.requestAnimationFrame(update);
     }
 }
 
-function playSong(fileName) {
-    let playSong;
+function playSong(e: object) {
+    let playSong: HTMLAudioElement | null = null;
+    let streamable: any;
+    const payload = e as SongEvent;
+    const fileName: string = payload.fileName;
 
-    songs.value.forEach(song => {
-        song.source.pause();
+    songs.value.forEach((song: SongType) => {
+        const source: HTMLAudioElement = song.source as HTMLAudioElement;
+
+        source.pause();
 
         if (song.fileName === fileName) {
-            playSong = song;
+            playSong = song.source;
             currentSong.value = song.title;
         }
     });
 
-    playSong.source.play();
+    if (!playSong) {
+        return;
+    }
+
+    // cast as 'any' type because captureStream isn't yet standard on Audio elements
+    streamable = playSong as any;
+
+    streamable.play();
 
     audioCtx = new AudioContext();
     analyser = audioCtx.createAnalyser();
-    source = audioCtx.createMediaStreamSource(playSong.source.captureStream());
+    source = audioCtx.createMediaStreamSource(streamable.captureStream());
     source.connect(analyser);
 
     analyser.fftSize = FFT_SIZE;
@@ -78,32 +93,49 @@ function playSong(fileName) {
     update();
 }
 
-function pauseSong(fileName) {
-    const song = songs.value.find(song => song.fileName === fileName);
+function pauseSong(e: object) {
+    const payload = e as SongEvent;
+    const fileName: string = payload.fileName;
+    const song: SongType | undefined = songs.value.find(song => song.fileName === fileName);
 
-    song.source.pause();
+    if (song) {
+        const source: HTMLAudioElement = song.source as HTMLAudioElement;
+
+        source.pause();
+    }
 
     return song;
 }
 
-function stopSong(fileName) {
-    const song = pauseSong(fileName);
+function stopSong(e: object) {
+    const payload = e as SongEvent;
+    const song: SongType | undefined = pauseSong(payload);
 
-    song.source.currentTime = 0;
+    if (song) {
+        const source: HTMLAudioElement = song.source as HTMLAudioElement;
+
+        source.currentTime = 0;
+    }
 }
-function updateTime(e) {
-     const { target } = e;
-     const { id, currentTime } = target;
+
+function updateTime(e: Event) {
+    const target: HTMLAudioElement = e.target as HTMLAudioElement;
+    const id: string = target.id;
+    const currentTime: number = target.currentTime;
+
     currentSongTimes.value.splice(Number(id), 1, currentTime);
 }
+
 onMounted(() => {
    let index = 0;
    songs.value.forEach(song => {
        song.source = new Audio(`./${song.fileName}.mp3`);
-       song.source.id = index;
+       song.source.id = `${index}`;
        song.source.addEventListener('timeupdate', updateTime);
        song.source.addEventListener('canplay', (e) => {
-           totalSongTimes.value.splice(Number(e.currentTarget.id), 1, e.currentTarget.duration);
+           const target: HTMLAudioElement = e.currentTarget as HTMLAudioElement;
+
+           totalSongTimes.value.splice(Number(target.id), 1, target.duration);
        });
 
        totalSongTimes.value.push(0);

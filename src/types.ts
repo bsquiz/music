@@ -2,5 +2,9 @@ export type SongType = {
     title: string;
     fileName: string;
     id: string;
-    source: object;
-}
+    source: HTMLAudioElement | null;
+};
+
+export type SongEvent = {
+    fileName: string;
+};
