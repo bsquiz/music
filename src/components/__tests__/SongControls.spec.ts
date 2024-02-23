@@ -21,10 +21,10 @@ describe('SongControls', () => {
     });
 
     it('renders properly', () => {
-        const buttons:HTMLElement[] = wrapper.findAll('[data-test$="control"]');
-        const title:HTMLElement = wrapper.find('[data-test="title"]');
-        const currentSongTime:HTMLElement = wrapper.find('[data-test="song-current-time"]');
-        const totalSongTime:HTMLElement = wrapper.find('[data-test="song-total-time"]');
+        const buttons:any = wrapper.findAll('[data-test$="control"]');
+        const title:any = wrapper.find('[data-test="title"]');
+        const currentSongTime:any = wrapper.find('[data-test="song-current-time"]');
+        const totalSongTime:any = wrapper.find('[data-test="song-total-time"]');
 
         expect(buttons.length).toBe(3);
         expect(title.text()).toBe('test');
