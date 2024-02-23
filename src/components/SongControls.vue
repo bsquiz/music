@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import {watch, ref, defineEmits, defineProps} from "vue";
 
-const progressBar = ref(null);
+const progressBar = ref<HTMLElement>();
 const ballPosition = ref(0);
 const ballStyle = ref('');
 const props = defineProps({
@@ -23,10 +23,11 @@ const props = defineProps({
     }
 });
 const songTimeFormatted = function(time: number) {
-    const minutes = (time / 60).toFixed(0);
-    const seconds = (time % 60).toFixed(0);
+    const seconds = (time % 60);
+    const formattedMinutes = (time / 60).toFixed(0);
+    const formattedSeconds = seconds.toFixed(0);
 
-    return `${minutes}:${seconds < 10 ? '0' + seconds : seconds}`;
+    return `${formattedMinutes}:${seconds < 10 ? '0' + formattedSeconds : formattedSeconds}`;
 }
 
 defineEmits<{
@@ -38,8 +39,8 @@ defineEmits<{
 watch(
     () => props.currentSongTime,
     (val: number) => {
-        const barWidth = (progressBar?.value?.offsetWidth || 0).toFixed(0);
-        const timeRatio = val / props.totalSongTime;
+        const barWidth: number = Number(progressBar?.value?.offsetWidth || 0);
+        const timeRatio: number = val / props.totalSongTime;
 
         ballPosition.value = barWidth * timeRatio;
         ballStyle.value = `left: ${Number(ballPosition.value).toFixed(0)}px;`;
@@ -63,9 +64,9 @@ watch(
             </div>
 
             <div class="d-flex mt-2">
-                <button class="button light-gray-bkg" data-test="song-play-control" @click="$emit('songplay', fileName)">&blacktriangleright;</button>
-                <button class="button light-gray-bkg" data-test="song-pause-control" @click="$emit('songpause', fileName)">&Verbar;</button>
-                <button class="button light-gray-bkg" data-test="song-stop-control" @click="$emit('songstop', fileName)">&FilledSmallSquare;</button>
+                <button class="button light-gray-bkg" data-test="song-play-control" @click="$emit('songplay', { fileName })">&blacktriangleright;</button>
+                <button class="button light-gray-bkg" data-test="song-pause-control" @click="$emit('songpause', { fileName })">&Verbar;</button>
+                <button class="button light-gray-bkg" data-test="song-stop-control" @click="$emit('songstop', { fileName })">&FilledSmallSquare;</button>
             </div>
         </div>
 

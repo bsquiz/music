@@ -1,26 +1,27 @@
 <script setup lang="ts">
 import {onMounted, ref, defineProps, defineExpose} from "vue";
+import {GraphType, VisualizerDimension, FFT_SIZE} from "../constants";
 
-const canvas = ref('canvas');
-let ctx = {};
+const canvas = ref<InstanceType<typeof HTMLCanvasElement>>();
+let ctx: CanvasRenderingContext2D | null;
 
 const props = defineProps({
     mode: {
         type: String,
-        default: 'wave'
+        default: GraphType.WAVE
     },
     width: {
         type: Number,
-        default: 500
+        default: VisualizerDimension.WIDTH
     },
     height: {
         type: Number,
-        default: 400
+        default: VisualizerDimension.HEIGHT
     },
     data: {
-        type: Object,
+        type: Uint8Array,
         default: () => {
-            return {};
+            return new Uint8Array(FFT_SIZE);
         }
     },
     bufferLength: {
@@ -33,7 +34,7 @@ const props = defineProps({
     }
 });
 
-function draw(ctx, dataArray, bufferLength) {
+function draw(ctx: CanvasRenderingContext2D, dataArray: Uint8Array, bufferLength: number) {
     ctx.clearRect(0, 0, props.width, props.height);
 
     ctx.lineWidth = 2;
@@ -60,8 +61,9 @@ function draw(ctx, dataArray, bufferLength) {
 }
 
 function update() {
-    draw(ctx, props.data, props.bufferLength);
-
+    if (ctx) {
+        draw(ctx, props.data, props.bufferLength);
+    }
 }
 
 defineExpose({
@@ -69,9 +71,13 @@ defineExpose({
 });
 
 onMounted(() => {
-    ctx = canvas.value.getContext('2d');
+    if (canvas.value) {
+        ctx = canvas.value.getContext('2d');
 
-    ctx.strokeStyle = 'hsla(160, 100%, 37%, 1)';
+        if (ctx) {
+            ctx.strokeStyle = 'hsla(160, 100%, 37%, 1)';
+        }
+    }
 });
 </script>
 
